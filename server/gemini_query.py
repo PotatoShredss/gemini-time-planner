@@ -1,6 +1,6 @@
 from google import genai
 import os
-from dotenv import load_dotenv #NOT RESOLVED!!!
+from dotenv import load_dotenv 
 
 load_dotenv()
 

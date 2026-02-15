@@ -8,7 +8,7 @@ import { queryAiProgress } from '../utils/api'
 export default function WorkflowPage({ session, onEnd }) {
   // session: { totalHours, tasks: ordered array }
   const totalSecondsInitial = useMemo(() => minutesToSeconds(session.totalHours * 60 / 60), [session.totalHours])
-  // note: user passed hours, convert to minutes*60:
+  //note: user passed hours, convert to minutes*60:
   const [totalSeconds, setTotalSeconds] = useState(session.totalHours * 3600)
   const [secondsLeft, setSecondsLeft] = useState(session.totalHours * 3600)
   const [tasks, setTasks] = useState(() =>
@@ -21,7 +21,17 @@ export default function WorkflowPage({ session, onEnd }) {
     return () => clearInterval(timerRef.current)
   }, [])
 
-  // Add this effect below your existing session timer effect
+  // If total estimated minutes for tasks exceed allotted time, show error and go back
+  useEffect(() => {
+    const totalTaskMinutes = (session.tasks || []).reduce((s, t) => s + (t.minutes || 0), 0)
+    const totalAllottedMinutes = (session.totalHours || 0) * 60
+    if (totalTaskMinutes > totalAllottedMinutes) {
+      alert('Total task time exceeds allotted session time. Please adjust tasks or increase total time.')
+      onEnd()
+    }
+  }, [session, onEnd])
+
+
 useEffect(() => {
   if (tasks.length > 0) {
     const currentTask = tasks[0];
@@ -53,7 +63,7 @@ useEffect(() => {
   setTasks((cur) => {
     const remaining = cur.filter((t) => t.id !== id)
 
-    // If no tasks left → end session
+    // If no tasks left then end session
     if (remaining.length === 0) {
       clearInterval(timerRef.current)
       onEnd()
@@ -99,34 +109,15 @@ useEffect(() => {
       return { t, start, end, durationSeconds, remaining }
     })
 
-    const totalRemainingSeconds = perTask.reduce((s, p) => s + p.remaining, 0)
+    const totalRemainingSeconds = perTask.reduce((s, p) => s + p.remaining, 0) || 1
 
-    // extra time is the remaining session time not allocated to tasks
-    const extraRemainingSeconds = Math.max(0, (secondsLeft || 0) - totalRemainingSeconds)
-
-    const totalVisibleSeconds = (totalRemainingSeconds || 0) + extraRemainingSeconds || 1
-
-    const mapped = perTask.map((p) => ({
+    return perTask.map((p) => ({
       ...p.t,
-      fraction: p.remaining / totalVisibleSeconds,
+      fraction: p.remaining / totalRemainingSeconds,
+      // show start/end relative to now (0 = now)
       startTimeStr: getFutureTime(Math.max(0, p.start - elapsedSeconds)),
       endTimeStr: getFutureTime(Math.max(0, p.end - elapsedSeconds))
     }))
-
-    if (extraRemainingSeconds > 0) {
-      const lastEnd = perTask.length ? perTask[perTask.length - 1].end : 0
-      mapped.push({
-        id: 'extra-time',
-        title: 'Extra time',
-        isExtra: true,
-        minutes: Math.ceil(extraRemainingSeconds / 60),
-        fraction: extraRemainingSeconds / totalVisibleSeconds,
-        startTimeStr: getFutureTime(Math.max(0, lastEnd - elapsedSeconds)),
-        endTimeStr: getFutureTime(Math.max(0, lastEnd + extraRemainingSeconds - elapsedSeconds))
-      })
-    }
-
-    return mapped
   }, [tasks, secondsLeft, totalSeconds])
 
 

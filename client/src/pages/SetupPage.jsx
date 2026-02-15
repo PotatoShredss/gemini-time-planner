@@ -15,13 +15,13 @@ const formInputStyle = {
   width: '100%',
   marginBottom: '8px',
   padding: '8px',
-  boxSizing: 'border-box', // Crucial: ensures padding doesn't push width over 100%
+  boxSizing: 'border-box',
   display: 'block'
 };
 
 export default function SetupPage({ onStart }) {
   const [tasks, setTasks] = useState([emptyTask()])
-  const [totalHours, setTotalHours] = useState(4) // default 4 hours
+  const [totalHours, setTotalHours] = useState(4)
   const [loading, setLoading] = useState(false)
 
   function updateTask(idx, patch) {
@@ -36,15 +36,18 @@ export default function SetupPage({ onStart }) {
 
   async function startSession() {
     // basic validation
-    const filtered = tasks.filter((t) => t.title.trim())
+    const finalHours = totalHours === '' ? 0 : Number(totalHours);
+    const filtered = tasks.filter((t) => t.title.trim());
     if (filtered.length === 0) {
       alert('Add at least one task with a name.')
       return
     }
+    if (finalHours <= 0) {
+      alert('Please enter a valid amount of time.');
+      return;
+    }
     setLoading(true)
-    // call backend/Gemini to assign priorities (returns array of task ids in desired order)
     const ordering = await queryAiPriorities(filtered, Number(totalHours))
-    // ordering may be array of ids; produce prioritized tasks list
     const byId = Object.fromEntries(filtered.map((t) => [t.id, t]))
     let orderedTasks
     if (Array.isArray(ordering) && ordering.length > 0 && ordering[0] && typeof ordering[0] === 'string') {
@@ -66,14 +69,17 @@ export default function SetupPage({ onStart }) {
     <div className="setup-page">
       <h1>Setup</h1>
 
-      <label>
+      <label style={{ display: 'block', marginBottom: '20px' }}>
         Total available hours:
         <input
           type="number"
-          min="0.25"
           step="0.25"
-          value={totalHours}
-          onChange={(e) => setTotalHours(e.target.value)}
+          value={totalHours} 
+          onChange={(e) => {
+            const val = e.target.value;
+            setTotalHours(val === '' ? '' : val); 
+          }}
+          style={{ marginLeft: '0px', padding: '4px', maxWidth: '62vw' }}
         />
       </label>
 
@@ -85,7 +91,7 @@ export default function SetupPage({ onStart }) {
             marginBottom: '12px', 
             borderRadius: '4px',
             width: '100%',
-            maxWidth: '500px'
+            maxWidth: '61vw'
           }}>
             <input
               style={formInputStyle}

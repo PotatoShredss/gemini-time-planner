@@ -1,0 +1,16 @@
+# Python virtual environments
+.venv/
+server/venv/
+__pycache__/
+*.pyc
+
+# Environment variables (CRITICAL)
+.env
+server/.env
+
+# Node dependencies
+node_modules/
+dist/
+
+# IDE settings
+.vscode/

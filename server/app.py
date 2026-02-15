@@ -48,9 +48,5 @@ def assign_priorities():
     ordered_tasks = task_queue.get_all_tasks()
 
     return jsonify({"ordering": ordered_tasks})
-
-
-
-
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
