@@ -23,7 +23,14 @@ class PriorityTaskQueue:
         return heapq.heappop(self.queue)[3]
 
     def get_all_tasks(self):
-        return [item[3] for item in sorted(self.queue)]
+        print(item[3] for item in sorted(self.queue))
+        return [
+            {
+                **item[3],
+                'priority': item[0]
+            }
+            for item in sorted(self.queue)
+        ]
 
     def is_empty(self):
         return len(self.queue) == 0

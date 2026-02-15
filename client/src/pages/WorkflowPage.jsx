@@ -35,7 +35,7 @@ export default function WorkflowPage({ session, onEnd }) {
   function finishTask(id) {
     // mark finished and optionally reallocate remaining minutes to "extra"
     updateTaskById(id, { completed: true })
-  }
+  } 
 
   function shiftPosition(id, delta) {
     setTasks((cur) => {

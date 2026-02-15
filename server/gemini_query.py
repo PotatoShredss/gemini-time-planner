@@ -1,4 +1,8 @@
 from google import genai
+import os
+from dotenv import load_dotenv #NOT RESOLVED!!!
+
+load_dotenv()
 
 
 def query_gemini(prompt: str) -> str:
@@ -12,7 +16,7 @@ def query_gemini(prompt: str) -> str:
         str: The response text from Gemini API.
     """
     # Configure API key from environment variable
-    client = genai.Client()
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt
