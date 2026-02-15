@@ -1,7 +1,7 @@
 aeiou
 
 TODO:
-1: decide on tech stack
+1: decide on tech stack: python+react
 2: set up file structure w/ ai
 3: code lol
     3.1:frontend
