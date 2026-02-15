@@ -1,8 +1,8 @@
-# ⏱️ Gemini Time Planner
+# Gemini Time Planner
 
 An intelligent task management and time planning application powered by Google Gemini AI. Plan your day efficiently with AI-assisted time estimation and visual progress tracking.
 
-## 📖 Table of Contents
+## Table of Contents
 
 - [Features](#-features)
 - [Demo](#-demo)
@@ -15,7 +15,7 @@ An intelligent task management and time planning application powered by Google G
 
 ---
 
-## ✨ Features
+## Features
 
 ### AI-Powered Time Estimation
 - **Google Gemini Integration**: Analyzes task complexity and suggests realistic time estimates
