@@ -11,6 +11,14 @@ function emptyTask() {
   }
 }
 
+const formInputStyle = {
+  width: '100%',
+  marginBottom: '8px',
+  padding: '8px',
+  boxSizing: 'border-box', // Crucial: ensures padding doesn't push width over 100%
+  display: 'block'
+};
+
 export default function SetupPage({ onStart }) {
   const [tasks, setTasks] = useState([emptyTask()])
   const [totalHours, setTotalHours] = useState(4) // default 4 hours
@@ -71,20 +79,29 @@ export default function SetupPage({ onStart }) {
 
       <div className="task-forms">
         {tasks.map((task, idx) => (
-          <div key={task.id} className="task-form">
+          <div key={task.id} className="task-form" style={{ 
+            border: '1px solid #ddd', 
+            padding: '12px', 
+            marginBottom: '12px', 
+            borderRadius: '4px',
+            width: '100%',
+            maxWidth: '500px'
+          }}>
             <input
+              style={formInputStyle}
               placeholder="Task name"
               value={task.title}
               onChange={(e) => updateTask(idx, { title: e.target.value })}
             />
             <input
+              style={formInputStyle}
               placeholder="Minutes (estimate)"
               type="number"
-              min="1"
               value={task.minutes}
-              onChange={(e) => updateTask(idx, { minutes: Number(e.target.value) })}
+              onChange={(e) => updateTask(idx, { minutes: e.target.value === '' ? '' : Number(e.target.value) })}
             />
             <textarea
+              style={{ ...formInputStyle, height: '60px', resize: 'vertical' }}
               placeholder="Description / notes"
               value={task.description}
               onChange={(e) => updateTask(idx, { description: e.target.value })}

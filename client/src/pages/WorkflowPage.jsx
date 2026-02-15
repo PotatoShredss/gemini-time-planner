@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import TaskBar from '../components/TaskBar'
 import VerticalTimeline from '../components/VerticalTimeline'
-import { minutesToSeconds, secondsToClock } from '../utils/timeHelpers'
+import { getFutureTime, minutesToSeconds, secondsToDuration } from '../utils/timeHelpers'
 import { queryAiProgress } from '../utils/api'
 
 export default function WorkflowPage({ session, onEnd }) {
@@ -21,6 +21,23 @@ export default function WorkflowPage({ session, onEnd }) {
     return () => clearInterval(timerRef.current)
   }, [])
 
+  // Add this effect below your existing session timer effect
+useEffect(() => {
+  if (tasks.length > 0) {
+    const currentTask = tasks[0];
+    const totalAllocatedSeconds = tasks.reduce((acc, t) => acc + (t.minutes * 60), 0);
+    
+    // If the time left in the session is less than the time required 
+    // for all tasks MINUS the current task, it means the current task's time is up.
+    const remainingTasksTime = (totalAllocatedSeconds - (currentTask.minutes * 60));
+    
+    if (secondsLeft < remainingTasksTime) {
+      // Small delay or notification can be added here
+      finishTask(currentTask.id);
+    }
+  }
+}, [secondsLeft, tasks, finishTask]);
+
   useEffect(() => {
     if (secondsLeft <= 0) {
       clearInterval(timerRef.current)
@@ -33,9 +50,24 @@ export default function WorkflowPage({ session, onEnd }) {
   }
 
   function finishTask(id) {
-    // mark finished and optionally reallocate remaining minutes to "extra"
-    updateTaskById(id, { completed: true })
-  } 
+  setTasks((cur) => {
+    const remaining = cur.filter((t) => t.id !== id)
+
+    // If no tasks left → end session
+    if (remaining.length === 0) {
+      clearInterval(timerRef.current)
+      onEnd()
+      return []
+    }
+
+    // Recalculate positions
+    return remaining.map((t, i) => ({
+      ...t,
+      position: i + 1
+    }))
+  })
+}
+
 
   function shiftPosition(id, delta) {
     setTasks((cur) => {
@@ -51,27 +83,61 @@ export default function WorkflowPage({ session, onEnd }) {
     })
   }
 
-  async function askAiProgress(task) {
-    const ai = await queryAiProgress(task)
-    // show result simply for now
-    alert(`AI: ${ai.progress}. Recommend extra ${ai.recommended_extra_minutes} min`)
-  }
-
   // compute proportional visual mapping for the progress bar top-left:
-  const totalTaskMinutes = tasks.reduce((s, t) => s + (t.minutes || 0), 0) || 1
-  const taskAllocations = tasks.map((t) => ({
-    ...t,
-    fraction: (t.minutes || 0) / totalTaskMinutes
-  }))
+  const tasksWithLiveTimes = useMemo(() => {
+    const elapsedSeconds = (totalSeconds || 0) - (secondsLeft || 0)
+
+    // compute remaining seconds per task after accounting for elapsed time
+    let accumulatedSeconds = 0
+    const perTask = tasks.map((t) => {
+      const durationSeconds = (t.minutes || 0) * 60
+      const start = accumulatedSeconds
+      const end = start + durationSeconds
+      const consumed = Math.max(0, Math.min(durationSeconds, elapsedSeconds - start))
+      const remaining = Math.max(0, durationSeconds - consumed)
+      accumulatedSeconds += durationSeconds
+      return { t, start, end, durationSeconds, remaining }
+    })
+
+    const totalRemainingSeconds = perTask.reduce((s, p) => s + p.remaining, 0)
+
+    // extra time is the remaining session time not allocated to tasks
+    const extraRemainingSeconds = Math.max(0, (secondsLeft || 0) - totalRemainingSeconds)
+
+    const totalVisibleSeconds = (totalRemainingSeconds || 0) + extraRemainingSeconds || 1
+
+    const mapped = perTask.map((p) => ({
+      ...p.t,
+      fraction: p.remaining / totalVisibleSeconds,
+      startTimeStr: getFutureTime(Math.max(0, p.start - elapsedSeconds)),
+      endTimeStr: getFutureTime(Math.max(0, p.end - elapsedSeconds))
+    }))
+
+    if (extraRemainingSeconds > 0) {
+      const lastEnd = perTask.length ? perTask[perTask.length - 1].end : 0
+      mapped.push({
+        id: 'extra-time',
+        title: 'Extra time',
+        isExtra: true,
+        minutes: Math.ceil(extraRemainingSeconds / 60),
+        fraction: extraRemainingSeconds / totalVisibleSeconds,
+        startTimeStr: getFutureTime(Math.max(0, lastEnd - elapsedSeconds)),
+        endTimeStr: getFutureTime(Math.max(0, lastEnd + extraRemainingSeconds - elapsedSeconds))
+      })
+    }
+
+    return mapped
+  }, [tasks, secondsLeft, totalSeconds])
+
 
   return (
     <div className="workflow-page" style={{ display: 'flex', gap: 20 }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div>Total left: {secondsToClock(secondsLeft)}</div>
+            <div>Total left: {secondsToDuration(secondsLeft)}</div>
             <div className="progress-row" style={{ marginTop: 8 }}>
-              <TaskBar compact tasks={taskAllocations} secondsLeft={secondsLeft} />
+              <TaskBar compact tasks={tasksWithLiveTimes} secondsLeft={secondsLeft} />
             </div>
           </div>
 
@@ -111,9 +177,7 @@ export default function WorkflowPage({ session, onEnd }) {
                   </div>
                   <div style={{ marginTop: 6 }}>
                     <button onClick={() => finishTask(t.id)}>Mark finished</button>
-                    <button onClick={() => askAiProgress(t)} style={{ marginLeft: 6 }}>
-                      Ask AI progress
-                    </button>
+                    
                   </div>
                 </div>
               </div>

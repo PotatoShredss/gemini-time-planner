@@ -1,11 +1,183 @@
-body { font-family: system-ui, sans-serif; margin: 12px; color: #111; }
-.app { max-width: 1000px; margin: auto; }
-.setup-page input { display:block; margin:6px 0; padding:6px; }
-.task-form { border:1px solid #eee; padding:8px; margin-bottom:8px; }
-.task-bar { display:flex; height:80px; border:1px solid #ccc; margin:12px 0; overflow:hidden; }
-.task-bar-segment { position:relative; display:block; }
-.task-block { height:100%; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; cursor:pointer; }
-.task-menu { position:absolute; top:90px; left:0; background:#fff; border:1px solid #ccc; padding:8px; z-index:20; }
-.setup-page input, .setup-page textarea { width: 100%; margin: 6px 0; padding: 6px; }
-.task-form { margin-bottom: 8px; border: 1px solid #eee; padding: 8px; }
-.workflow-page { padding: 8px; }
+/* CSS Variables for Light and Dark Mode */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #eeeeee;
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --border-primary: #cccccc;
+  --border-secondary: #eeeeee;
+  --accent: #0066cc;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Colors */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #252525;
+  --bg-tertiary: #303030;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --border-primary: #404040;
+  --border-secondary: #333333;
+  --accent: #4da6ff;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 12px;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app {
+  max-width: 1000px;
+  margin: auto;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-primary);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.theme-toggle:hover {
+  background: var(--bg-tertiary);
+  transform: scale(1.1) rotate(15deg);
+}
+
+/* Setup Page Styles */
+.setup-page {
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.setup-page input,
+.setup-page textarea {
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.setup-page input:focus,
+.setup-page textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.1);
+}
+
+/* Task Form */
+.task-form {
+  border: 1px solid var(--border-secondary);
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.task-form:hover {
+  border-color: var(--border-primary);
+}
+
+/* Buttons */
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin: 4px;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Task Bar */
+.task-bar {
+  display: flex;
+  height: 80px;
+  border: 1px solid var(--border-primary);
+  margin: 12px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+
+.task-bar-segment {
+  position: relative;
+  display: block;
+}
+
+.task-block {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  cursor: pointer;
+  padding: 0 10px;
+  color: white;
+  font-weight: 500;
+}
+
+/* Task Menu */
+.task-menu {
+  position: absolute;
+  top: 90px;
+  left: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  padding: 8px;
+  z-index: 20;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+/* Workflow Page */
+.workflow-page {
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin: 8px 0 4px 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Headings */
+h1, h2, h3 {
+  color: var(--text-primary);
+}

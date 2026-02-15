@@ -38,14 +38,15 @@ export default function VerticalTimeline({ tasks = [], onAdjust, onShift, onFini
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 padding: '6px 8px',
-                background: t.completed ? '#f0f6f0' : '#fff',
+                color: '#333',
+                background: t.completed ? '#f0f6f0' : '#ffffff',
                 border: '1px solid #eee',
                 cursor: 'pointer'
               }}
             >
               <div>
                 <div style={{ fontWeight: 600 }}>{t.title}</div>
-                <div style={{ fontSize: 12, color: '#666' }}>
+                <div style={{ fontSize: 12, color: '#555' }}>
                   {formatDuration(t.minutes || 0)} — pos {t.position}
                 </div>
 
